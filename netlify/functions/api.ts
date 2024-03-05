@@ -1,12 +1,96 @@
 import express, { Router } from 'express';
 import serverless from 'serverless-http';
+import { v4 as uuidv4, parse } from 'uuid';
+import { countDistinct, eq } from 'drizzle-orm';
 
-// import { getDatabase } from './db/db';
+import { isNewClick } from './db/types';
+import { getDatabase } from './db/db';
 
 const api = express();
+api.use(express.json());
 
 const router = Router();
-router.get('/hello', (req, res) => res.send('Hello World!'));
+
+router.post('/create-session', async (req, res) => {
+  const { db, schema } = await getDatabase();
+  const sessionId = uuidv4();
+  const dateCreated = new Date();
+
+  await db.insert(schema.sessions).values({
+    id: sessionId,
+    dateCreated,
+  });
+
+  res.json({ sessionId });
+});
+
+router.post('/update-session', async (req, res) => {
+  const { db, schema } = await getDatabase();
+  const { sessionId, clicks } = req.body;
+
+  if (!sessionId || !clicks) {
+    return res.status(400).json({ message: 'Invalid request.' });
+  }
+
+  try {
+    parse(sessionId);
+  } catch (error) {
+    return res.status(400).json({ message: 'Invalid session ID.' });
+  }
+
+  if (!Array.isArray(clicks)) {
+    return res.status(400).json({ message: 'Invalid clicks data.' });
+  }
+
+  if (!clicks.every(isNewClick)) {
+    return res.status(400).json({ message: 'Invalid clicks data.' });
+  }
+
+  const sessionResult = await db.select({
+    value: countDistinct(schema.sessions.id),
+  }).from(schema.sessions).where(eq(schema.sessions.id, sessionId));
+
+  if (sessionResult[0]?.value === 0) {
+    return res.status(404).json({ message: 'Session not found.' });
+  }
+
+  await Promise.all(clicks.map(click => 
+    db.insert(schema.clicks).values({
+      sessionId,
+      dateCreated: new Date(click.dateCreated),
+      phase: click.phase,
+    }),
+  ));
+
+  res.json({ message: 'Session updated successfully.' });
+});
+
+router.get('/analyse-session/:sessionId', async (req, res) => {
+  const { db, schema } = await getDatabase();
+  const { sessionId } = req.params;
+
+  if (!sessionId) {
+    return res.status(400).json({ message: 'Invalid request.' });
+  }
+
+  try {
+    parse(sessionId);
+  } catch (error) {
+    return res.status(400).json({ message: 'Invalid session ID.' });
+  }
+
+  const result = await db.select({
+    value: countDistinct(schema.clicks.id),
+  }).from(schema.clicks).where(eq(schema.clicks.sessionId, sessionId));
+  const clicksCount = result[0]?.value;
+
+  res.json({ sessionId, clicksCount });
+});
+
+// add basic hello endpoint
+router.get('/hello', (req, res) => {
+  res.json({ message: 'Hello, World!' });
+});
 
 api.use('/api/', router);
 

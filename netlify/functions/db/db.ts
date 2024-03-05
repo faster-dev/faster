@@ -17,5 +17,5 @@ export const getDatabase = async () => {
   await client.connect();
   const db = drizzle(client, { schema });
 
-  return { db, client };
+  return { db, client, schema };
 };
