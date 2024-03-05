@@ -11,7 +11,7 @@ api.use(express.json());
 
 const router = Router();
 
-router.post('/create-session', async (req, res) => {
+router.get('/create-session', async (req, res) => {
   const { db, schema } = await getDatabase();
   const sessionId = uuidv4();
   const dateCreated = new Date();
