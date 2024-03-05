@@ -11,13 +11,23 @@ export type UpdateSessionArgs = {
 };
 
 const updateSession = async ({ sessionId, clicks }: UpdateSessionArgs): Promise<void> => {
-  await fetch(`${apiEndpoint}/update-session`, {
+  if (import.meta.env.DEV) {
+    console.debug('updateSession', sessionId, clicks);
+
+    return;
+  }
+
+  const response = await fetch(`${apiEndpoint}/update-session`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({ sessionId, clicks }),
   });
+
+  if (!response.ok) {
+    throw new Error('Update failed');
+  }
 };
 
 export default updateSession;

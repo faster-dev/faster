@@ -46,21 +46,26 @@ router.post('/update-session', async (req, res) => {
     return res.status(400).json({ message: 'Invalid clicks data.' });
   }
 
-  const sessionResult = await db.select({
-    value: countDistinct(schema.sessions.id),
-  }).from(schema.sessions).where(eq(schema.sessions.id, sessionId));
+  const sessionResult = await db
+    .select({
+      value: countDistinct(schema.sessions.id),
+    })
+    .from(schema.sessions)
+    .where(eq(schema.sessions.id, sessionId));
 
   if (sessionResult[0]?.value === 0) {
     return res.status(404).json({ message: 'Session not found.' });
   }
 
-  await Promise.all(clicks.map(click => 
-    db.insert(schema.clicks).values({
-      sessionId,
-      dateCreated: new Date(click.dateCreated),
-      phase: click.phase,
-    }),
-  ));
+  await Promise.all(
+    clicks.map((click) =>
+      db.insert(schema.clicks).values({
+        sessionId,
+        dateCreated: new Date(click.dateCreated),
+        phase: click.phase,
+      }),
+    ),
+  );
 
   res.json({ message: 'Session updated successfully.' });
 });
@@ -79,9 +84,12 @@ router.get('/analyse-session/:sessionId', async (req, res) => {
     return res.status(400).json({ message: 'Invalid session ID.' });
   }
 
-  const result = await db.select({
-    value: countDistinct(schema.clicks.id),
-  }).from(schema.clicks).where(eq(schema.clicks.sessionId, sessionId));
+  const result = await db
+    .select({
+      value: countDistinct(schema.clicks.id),
+    })
+    .from(schema.clicks)
+    .where(eq(schema.clicks.sessionId, sessionId));
   const clicksCount = result[0]?.value;
 
   res.json({ sessionId, clicksCount });

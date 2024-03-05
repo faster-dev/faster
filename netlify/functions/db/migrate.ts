@@ -7,6 +7,6 @@ const runMigrations = async () => {
   const { db, client } = await getDatabase();
   await migrate(db, { migrationsFolder: './drizzle' });
   await client.end();
-}
+};
 
 runMigrations();
