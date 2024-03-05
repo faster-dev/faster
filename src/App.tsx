@@ -5,16 +5,12 @@ import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 
 import { useIsMobile } from './hooks';
-import { useTime } from './hooks/TimeContext';
 import { createSession, updateSession, NewClick } from './api';
 
 const clicksPerPhase = [5, 20, 30, 10, 20, 30, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10];
 
 const App = () => {
   const [hidden, setHidden] = useState(false);
-  const { t1 } = useTime();
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [secondsElapsed, setSecondsElapsed] = useState(0);
   const { isMobile } = useIsMobile();
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [phase, setPhase] = useState(0);
@@ -36,10 +32,6 @@ const App = () => {
 
     fetchSession();
   }, []);
-
-  useEffect(() => {
-    setSecondsElapsed((prev) => prev + 1);
-  }, [t1]);
 
   useEffect(() => {
     const phaseClicks = clicksPerPhase[phase];
