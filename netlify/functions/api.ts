@@ -29,20 +29,24 @@ router.post('/update-session', async (req, res) => {
   const { sessionId, clicks } = req.body;
 
   if (!sessionId || !clicks) {
+    console.error('Invalid request - missing sessionId or clicks.', { sessionId, clicks });
     return res.status(400).json({ message: 'Invalid request.' });
   }
 
   try {
     parse(sessionId);
   } catch (error) {
+    console.error('Invalid session ID.', { sessionId });
     return res.status(400).json({ message: 'Invalid session ID.' });
   }
 
   if (!Array.isArray(clicks)) {
+    console.error('Invalid clicks data.', { clicks });
     return res.status(400).json({ message: 'Invalid clicks data.' });
   }
 
   if (!clicks.every(isNewClick)) {
+    console.error('Invalid clicks data.', { clicks });
     return res.status(400).json({ message: 'Invalid clicks data.' });
   }
 
@@ -54,6 +58,7 @@ router.post('/update-session', async (req, res) => {
     .where(eq(schema.sessions.id, sessionId));
 
   if (sessionResult[0]?.value === 0) {
+    console.error('Session not found.', { sessionId });
     return res.status(404).json({ message: 'Session not found.' });
   }
 
