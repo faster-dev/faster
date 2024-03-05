@@ -66,7 +66,7 @@ router.post('/update-session', async (req, res) => {
     clicks.map((click) =>
       db.insert(schema.clicks).values({
         sessionId,
-        dateCreated: new Date(click.dateCreated),
+        dateCreated: new Date(parseInt(click.dateCreated, 10)),
         phase: click.phase,
       }),
     ),
