@@ -140,7 +140,9 @@ const App = () => {
           textAlign: 'center',
         }}
       >
-        <Typography sx={{ fontSize: 20 }}>{message}</Typography>
+        <Typography sx={{ fontSize: 20, pointerEvents: 'none', userSelect: 'none' }}>
+          {message}
+        </Typography>
       </Stack>
     ),
     [message],
