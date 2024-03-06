@@ -8,6 +8,20 @@
       "when": 1709646853497,
       "tag": "0000_fuzzy_the_leader",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "5",
+      "when": 1709707764644,
+      "tag": "0001_futuristic_vulture",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "5",
+      "when": 1709707951073,
+      "tag": "0002_solid_gambit",
+      "breakpoints": true
     }
   ]
 }

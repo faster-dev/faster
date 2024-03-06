@@ -5,7 +5,7 @@ import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 
 import { useIsMobile } from './hooks';
-import { createSession, updateSession, NewClick } from './api';
+import { createSession, updateSession } from './api';
 
 const clicksPerPhase = [5, 20, 30, 10, 20, 30, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10];
 
@@ -14,15 +14,21 @@ const App = () => {
   const { isMobile } = useIsMobile();
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [phase, setPhase] = useState(0);
-  const [clicksCache, setClicksCache] = useState<NewClick[]>([]);
-  const [clicks, setClicks] = useState<NewClick[]>([]);
+  const [clicksCache, setClicksCache] = useState<number[]>([]);
+  const [clicks, setClicks] = useState<number[]>([]);
   const [clickCount, setClickCount] = useState(0);
   const handleClick = useCallback(() => {
-    const newClick = { dateCreated: Date.now().toString(), phase: phase.toString() };
+    const newClick = Date.now();
 
-    setClicks((prev) => [...prev, newClick]);
+    setClicks((prev) => {
+      if (prev.length === 0) {
+        return [newClick];
+      }
+
+      return [...prev, newClick - prev[0]];
+    });
     setClickCount((prev) => prev + 1);
-  }, [setClicks, setClickCount, phase]);
+  }, [setClicks, setClickCount]);
 
   useEffect(() => {
     const fetchSession = async () => {
@@ -53,7 +59,7 @@ const App = () => {
 
   useEffect(() => {
     if (phase && sessionId) {
-      updateSession({ sessionId, clicks: clicksCache });
+      updateSession({ sessionId, phase, clicks: clicksCache });
     }
 
     if (phase === clicksPerPhase.length - 1) {

@@ -2,8 +2,8 @@ import express, { Router } from 'express';
 import serverless from 'serverless-http';
 import { v4 as uuidv4, parse } from 'uuid';
 import { countDistinct, eq } from 'drizzle-orm';
+import isNumber from 'lodash/isNumber';
 
-import { isNewClick } from './db/types';
 import { getDatabase } from './db/db';
 
 const api = express();
@@ -26,10 +26,14 @@ router.get('/create-session', async (req, res) => {
 
 router.post('/update-session', async (req, res) => {
   const { db, schema } = await getDatabase();
-  const { sessionId, clicks } = req.body;
+  const { sessionId, phase, clicks } = req.body;
 
-  if (!sessionId || !clicks) {
-    console.error('Invalid request - missing sessionId or clicks.', { sessionId, clicks });
+  if (!sessionId || !phase || !clicks) {
+    console.error('Invalid request - missing sessionId, phase, or clicks.', {
+      sessionId,
+      phase,
+      clicks,
+    });
     return res.status(400).json({ message: 'Invalid request.' });
   }
 
@@ -40,12 +44,17 @@ router.post('/update-session', async (req, res) => {
     return res.status(400).json({ message: 'Invalid session ID.' });
   }
 
+  if (typeof phase !== 'number') {
+    console.error('Invalid phase.', { phase });
+    return res.status(400).json({ message: 'Invalid phase.' });
+  }
+
   if (!Array.isArray(clicks)) {
     console.error('Invalid clicks data.', { clicks });
     return res.status(400).json({ message: 'Invalid clicks data.' });
   }
 
-  if (!clicks.every(isNewClick)) {
+  if (!clicks.every(isNumber)) {
     console.error('Invalid clicks data.', { clicks });
     return res.status(400).json({ message: 'Invalid clicks data.' });
   }
@@ -63,13 +72,15 @@ router.post('/update-session', async (req, res) => {
   }
 
   await Promise.all(
-    clicks.map((click) =>
+    clicks.map((click, index) => {
+      const timestamp = index === 0 ? click : clicks[0] + click;
+
       db.insert(schema.clicks).values({
         sessionId,
-        dateCreated: new Date(parseInt(click.dateCreated, 10)),
-        phase: click.phase,
-      }),
-    ),
+        dateCreated: new Date(timestamp),
+        phase,
+      });
+    }),
   );
 
   res.json({ message: 'Session updated successfully.' });

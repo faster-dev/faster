@@ -1,18 +1,14 @@
 import { apiEndpoint } from './constants';
 
-export type NewClick = {
-  dateCreated: string;
-  phase: string;
-};
-
 export type UpdateSessionArgs = {
   sessionId: string;
-  clicks: NewClick[];
+  phase: number;
+  clicks: number[];
 };
 
-const updateSession = async ({ sessionId, clicks }: UpdateSessionArgs): Promise<void> => {
+const updateSession = async ({ sessionId, phase, clicks }: UpdateSessionArgs): Promise<void> => {
   if (import.meta.env.DEV) {
-    console.debug('updateSession', sessionId, clicks);
+    console.debug('updateSession', sessionId, phase, clicks);
 
     return;
   }
@@ -22,7 +18,7 @@ const updateSession = async ({ sessionId, clicks }: UpdateSessionArgs): Promise<
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ sessionId, clicks }),
+    body: JSON.stringify({ sessionId, phase, clicks }),
   });
 
   if (!response.ok) {

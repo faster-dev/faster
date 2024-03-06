@@ -1,0 +1,1 @@
+ALTER TABLE "clicks" ADD COLUMN "phase" integer DEFAULT 0 NOT NULL;
