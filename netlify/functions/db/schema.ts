@@ -1,4 +1,4 @@
-import { pgTable, uuid, timestamp, integer, serial } from 'drizzle-orm/pg-core';
+import { pgTable, uuid, boolean, timestamp, integer, serial } from 'drizzle-orm/pg-core';
 
 export const sessions = pgTable('sessions', {
   id: uuid('id').primaryKey(),
@@ -10,4 +10,5 @@ export const clicks = pgTable('clicks', {
   sessionId: uuid('session_id').references(() => sessions.id),
   dateCreated: timestamp('date_created', { precision: 6 }).notNull(),
   phase: integer('phase').notNull().default(0),
+  mobile: boolean('mobile').notNull().default(false),
 });

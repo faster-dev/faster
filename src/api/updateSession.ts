@@ -4,11 +4,17 @@ export type UpdateSessionArgs = {
   sessionId: string;
   phase: number;
   clicks: number[];
+  mobile: boolean;
 };
 
-const updateSession = async ({ sessionId, phase, clicks }: UpdateSessionArgs): Promise<void> => {
+const updateSession = async ({
+  sessionId,
+  phase,
+  clicks,
+  mobile,
+}: UpdateSessionArgs): Promise<void> => {
   if (import.meta.env.DEV) {
-    console.debug('updateSession', sessionId, phase, clicks);
+    console.debug('updateSession', sessionId, phase, clicks, mobile);
 
     return;
   }
@@ -18,7 +24,7 @@ const updateSession = async ({ sessionId, phase, clicks }: UpdateSessionArgs): P
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ sessionId, phase, clicks }),
+    body: JSON.stringify({ sessionId, phase, clicks, mobile }),
   });
 
   if (!response.ok) {

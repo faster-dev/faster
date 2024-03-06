@@ -1,0 +1,1 @@
+ALTER TABLE "clicks" ADD COLUMN "mobile" boolean DEFAULT false NOT NULL;

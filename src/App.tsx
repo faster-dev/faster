@@ -59,7 +59,7 @@ const App = () => {
 
   useEffect(() => {
     if (phase && sessionId) {
-      updateSession({ sessionId, phase, clicks: clicksCache });
+      updateSession({ sessionId, phase, clicks: clicksCache, mobile: isMobile });
     }
 
     if (phase === clicksPerPhase.length - 1) {

@@ -3,6 +3,7 @@ import serverless from 'serverless-http';
 import { v4 as uuidv4, parse } from 'uuid';
 import { countDistinct, eq } from 'drizzle-orm';
 import isNumber from 'lodash/isNumber';
+import isBoolean from 'lodash/isBoolean';
 
 import { getDatabase } from './db/db';
 
@@ -26,7 +27,7 @@ router.get('/create-session', async (req, res) => {
 
 router.post('/update-session', async (req, res) => {
   const { db, schema } = await getDatabase();
-  const { sessionId, phase, clicks } = req.body;
+  const { sessionId, phase, clicks, mobile } = req.body;
 
   if (!sessionId || !phase || !clicks) {
     console.error('Invalid request - missing sessionId, phase, or clicks.', {
@@ -59,6 +60,11 @@ router.post('/update-session', async (req, res) => {
     return res.status(400).json({ message: 'Invalid clicks data.' });
   }
 
+  if (!isBoolean(mobile)) {
+    console.error('Invalid mobile data.', { mobile });
+    return res.status(400).json({ message: 'Invalid mobile data.' });
+  }
+
   const sessionResult = await db
     .select({
       value: countDistinct(schema.sessions.id),
@@ -79,6 +85,7 @@ router.post('/update-session', async (req, res) => {
         sessionId,
         dateCreated: new Date(timestamp),
         phase,
+        mobile,
       });
     }),
   );
