@@ -5,7 +5,8 @@ import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 
 import { useTime, useIsMobile } from './hooks';
-import { createSession, updateSession } from './api';
+import { AnalyseSessionResponse, analyseSession, createSession, updateSession } from './api';
+import Stats from './Stats';
 
 const clicksPerPhase = [
   5, 20, 30, 10, 20, 30, 10, 10, 10, 10, 10, 10, 10, 10, 10, 30, 30, 30, 30, 30, 30, 30, 30,
@@ -21,7 +22,8 @@ const timeoutTicksPerPhase = (phase: number) => {
 const App = () => {
   const { t1 } = useTime();
   const [timeoutTicks, setTimeoutTicks] = useState(0);
-  const [showStats, setShowStats] = useState(false);
+  const [showStats, setShowStats] = useState(true);
+  const [statsData, setStatsData] = useState<AnalyseSessionResponse | undefined>();
   const { isMobile } = useIsMobile();
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [phase, setPhase] = useState(0);
@@ -108,8 +110,38 @@ const App = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [t1]);
 
-  const loading = useMemo(
-    () => (
+  useEffect(() => {
+    if (showStats && sessionId) {
+      const fetchStats = async () => {
+        const data = await analyseSession({ sessionId });
+
+        setStatsData(() => data);
+      };
+
+      fetchStats();
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showStats, sessionId]);
+
+  const loading = useMemo(() => {
+    const getOpacity = () => {
+      if (!sessionId) {
+        return 1;
+      }
+
+      if (!showStats) {
+        return 0;
+      }
+
+      if (statsData) {
+        return 0;
+      }
+
+      return 1;
+    };
+
+    return (
       <Stack
         sx={{
           position: 'absolute',
@@ -117,7 +149,7 @@ const App = () => {
           bottom: 0,
           height: '100%',
           width: '100%',
-          opacity: sessionId ? 0 : 1,
+          opacity: getOpacity(),
           transition: 'opacity ease-in-out 0.3s',
           justifyContent: 'center',
           alignItems: 'center',
@@ -126,9 +158,8 @@ const App = () => {
       >
         <Typography sx={{ fontFamily: 'copperplate', fontSize: 20 }}>Faster</Typography>
       </Stack>
-    ),
-    [sessionId],
-  );
+    );
+  }, [sessionId, showStats, statsData]);
   const message = useMemo(() => {
     switch (phase) {
       case 0:
@@ -281,21 +312,21 @@ const App = () => {
           justifyContent: 'center',
           alignItems: 'center',
           backgroundColor: 'white',
+          overflowY: 'auto',
         }}
       >
         <Stack
           sx={{
-            height: '100%',
             justifyContent: 'center',
             alignItems: 'center',
             backgroundColor: 'white',
           }}
         >
-          <Typography sx={{ fontFamily: 'copperplate', fontSize: 20 }}>STATS</Typography>
+          {statsData && <Stats statsData={statsData} />}
         </Stack>
       </Stack>
     ),
-    [showStats],
+    [showStats, statsData],
   );
 
   return (
