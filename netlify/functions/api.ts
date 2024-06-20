@@ -1,7 +1,7 @@
 import express, { Router } from 'express';
 import serverless from 'serverless-http';
 import { v4 as uuidv4, parse } from 'uuid';
-import { sql, countDistinct, eq, max } from 'drizzle-orm';
+import { sql, countDistinct, eq, max, lte } from 'drizzle-orm';
 import isNumber from 'lodash/isNumber';
 import isBoolean from 'lodash/isBoolean';
 
@@ -136,7 +136,7 @@ router.get('/analyse-session/:sessionId', async (req, res) => {
     .from(schema.sessions)
     .leftJoin(schema.clicks, eq(schema.sessions.id, schema.clicks.sessionId))
     .groupBy(schema.sessions.id)
-    .having(({ maxPhase }) => eq(maxPhase, 13));
+    .having(({ maxPhase }) => lte(maxPhase, 13));
   const sessionsWithMaxPhasesCount = sessionsWithMaxPhases[0]?.count;
 
   // count all sessions
@@ -146,7 +146,7 @@ router.get('/analyse-session/:sessionId', async (req, res) => {
     })
     .from(schema.sessions);
   const totalSessions = totalSessionsQuery[0]?.value;
-  const percetageStoppedImmediately = Math.round(
+  const percentageStoppedImmediately = Math.round(
     (sessionsWithMaxPhasesCount / totalSessions) * 100,
   );
 
@@ -157,7 +157,7 @@ router.get('/analyse-session/:sessionId', async (req, res) => {
     maxPhase,
     sessionsWithMaxPhasesCount,
     totalSessions,
-    percetageStoppedImmediately,
+    percentageStoppedImmediately,
     yourPhases: [
       {
         phase: 0,
