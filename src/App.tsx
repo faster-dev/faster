@@ -4,13 +4,26 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 
-import { useIsMobile } from './hooks';
-import { createSession, updateSession } from './api';
+import { useTime, useIsMobile } from './hooks';
+import { AnalyseSessionResponse, analyseSession, createSession, updateSession } from './api';
+import Stats from './Stats';
 
-const clicksPerPhase = [5, 20, 30, 10, 20, 30, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10];
+const clicksPerPhase = [
+  5, 20, 30, 10, 20, 30, 10, 10, 10, 10, 10, 10, 10, 10, 10, 30, 30, 30, 30, 30, 30, 30, 30,
+];
+const timeoutTicksPerPhase = (phase: number) => {
+  if (phase < 14) {
+    return 60;
+  }
+
+  return 5;
+};
 
 const App = () => {
-  const [hidden, setHidden] = useState(false);
+  const { t1 } = useTime();
+  const [timeoutTicks, setTimeoutTicks] = useState(0);
+  const [showStats, setShowStats] = useState(true);
+  const [statsData, setStatsData] = useState<AnalyseSessionResponse | undefined>();
   const { isMobile } = useIsMobile();
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [phase, setPhase] = useState(0);
@@ -28,6 +41,12 @@ const App = () => {
       return [...prev, newClick - prev[0]];
     });
     setClickCount((prev) => prev + 1);
+
+    if (phase < clicksPerPhase.length - 1) {
+      setTimeoutTicks(() => 0);
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setClicks, setClickCount]);
 
   useEffect(() => {
@@ -62,17 +81,67 @@ const App = () => {
       updateSession({ sessionId, phase, clicks: clicksCache, mobile: isMobile });
     }
 
-    if (phase === clicksPerPhase.length - 1) {
-      setTimeout(() => {
-        setHidden(() => true);
-      }, 1000);
-    }
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phase]);
 
-  const loading = useMemo(
-    () => (
+  useEffect(() => {
+    const timeoutTicksForPhase = timeoutTicksPerPhase(phase);
+
+    if (timeoutTicks === timeoutTicksForPhase) {
+      if (phase === 0) {
+        setTimeoutTicks(() => 0);
+      } else if (phase < 14) {
+        if (sessionId) {
+          updateSession({ sessionId, phase, clicks: clicksCache, mobile: isMobile });
+        }
+
+        setTimeoutTicks((prev) => prev + 1);
+
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      } else {
+        setShowStats(() => true);
+      }
+    } else {
+      setTimeoutTicks((prev) => prev + 1);
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [t1]);
+
+  useEffect(() => {
+    if (showStats && sessionId) {
+      const fetchStats = async () => {
+        const data = await analyseSession({ sessionId });
+
+        setStatsData(() => data);
+      };
+
+      fetchStats();
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [showStats, sessionId]);
+
+  const loading = useMemo(() => {
+    const getOpacity = () => {
+      if (!sessionId) {
+        return 1;
+      }
+
+      if (!showStats) {
+        return 0;
+      }
+
+      if (statsData) {
+        return 0;
+      }
+
+      return 1;
+    };
+
+    return (
       <Stack
         sx={{
           position: 'absolute',
@@ -80,7 +149,7 @@ const App = () => {
           bottom: 0,
           height: '100%',
           width: '100%',
-          opacity: sessionId ? 0 : 1,
+          opacity: getOpacity(),
           transition: 'opacity ease-in-out 0.3s',
           justifyContent: 'center',
           alignItems: 'center',
@@ -89,9 +158,8 @@ const App = () => {
       >
         <Typography sx={{ fontFamily: 'copperplate', fontSize: 20 }}>Faster</Typography>
       </Stack>
-    ),
-    [sessionId],
-  );
+    );
+  }, [sessionId, showStats, statsData]);
   const message = useMemo(() => {
     switch (phase) {
       case 0:
@@ -125,6 +193,20 @@ const App = () => {
       case 14:
         return 'Seriously, stop';
       case 15:
+        return <img src="/its-time-to-stop-stop.gif" />;
+      case 16:
+        return <img src="/stop-it-stop.gif" />;
+      case 17:
+        return <img src="/stop-office.webp" />;
+      case 18:
+        return <img src="/stop-it.webp" />;
+      case 19:
+        return <img src="/facepalm.webp" />;
+      case 20:
+        return <img src="/cut-it-out.webp" />;
+      case 21:
+        return <img src="/i-will-find-you.webp" />;
+      case 22:
         return 'Goodbye';
     }
   }, [phase]);
@@ -138,6 +220,11 @@ const App = () => {
           alignItems: 'center',
           backgroundColor: 'white',
           textAlign: 'center',
+          '& img': {
+            width: '100%',
+            position: 'relative',
+            top: '60px',
+          },
         }}
       >
         <Typography sx={{ fontSize: 20, pointerEvents: 'none', userSelect: 'none' }}>
@@ -190,7 +277,7 @@ const App = () => {
           bottom: 0,
           height: '100%',
           width: '100%',
-          opacity: sessionId ? 1 : 0,
+          opacity: sessionId && !showStats ? 1 : 0,
           transition: 'opacity ease-in-out 0.3s',
           justifyContent: 'center',
           alignItems: 'center',
@@ -208,7 +295,38 @@ const App = () => {
         </Stack>
       </Stack>
     ),
-    [sessionId, messageContainer, button],
+    [sessionId, showStats, messageContainer, button],
+  );
+  const stats = useMemo(
+    () => (
+      <Stack
+        sx={{
+          position: 'absolute',
+          top: 0,
+          bottom: 0,
+          height: '100%',
+          width: '100%',
+          opacity: showStats && statsData ? 1 : 0,
+          pointerEvents: showStats && statsData ? 'auto' : 'none',
+          transition: 'opacity ease-in-out 0.3s',
+          backgroundColor: 'white',
+          padding: '10%',
+          boxSizing: 'border-box',
+          overflowY: 'auto',
+        }}
+      >
+        <Stack
+          sx={{
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: 'white',
+          }}
+        >
+          {statsData && <Stats statsData={statsData} />}
+        </Stack>
+      </Stack>
+    ),
+    [showStats, statsData],
   );
 
   return (
@@ -218,12 +336,12 @@ const App = () => {
         top: 0,
         left: 0,
         height: '100vh',
-        width: '100vw',
-        display: hidden ? 'none' : 'block',
+        width: '100%',
       }}
     >
       {loading}
       {ui}
+      {stats}
     </Box>
   );
 };
