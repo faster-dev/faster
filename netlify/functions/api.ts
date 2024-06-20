@@ -157,45 +157,45 @@ router.get('/analyse-session/:sessionId', async (req, res) => {
     (sessionsWithMaxPhasesCount / totalSessions) * 100,
   );
 
-  // get time between clicks
-  // const averageTimeBetweenClicks = await db
-  //   .select({
-  //     phase: schema.clicks.phase,
-  //     avgTime: sql<number>`avg(extract(epoch from lead(${schema.clicks.dateCreated}, 1) over (partition by ${schema.clicks.phase} order by ${schema.clicks.dateCreated}) - ${schema.clicks.dateCreated}))`,
-  //   })
-  //   .from(schema.clicks)
-  //   .groupBy(schema.clicks.phase);
-  // type ClickPhase = { phase: number; averageTime: number };
-  // const unsortedAveragePhases = averageTimeBetweenClicks.reduce((acc, row) => {
-  //   return [
-  //     ...acc,
-  //     {
-  //       phase: row.phase,
-  //       averageTime: row.avgTime,
-  //     },
-  //   ];
-  // }, [] as ClickPhase[]);
-  // const averagePhases = [...unsortedAveragePhases].sort((a, b) => a.phase - b.phase);
-
   // your phases
-  // const yourAverageTimeBetweenClicks = await db
+  const clicksPerSecondByPhase = await db
+    .select({
+      phase: schema.clicks.phase,
+      clicksPerSecond: sql<number>`count(*) / (max(${schema.clicks.dateCreated}) - min(${schema.clicks.dateCreated}))`,
+    })
+    .from(schema.clicks)
+    .where(eq(schema.clicks.sessionId, sessionId))
+    .groupBy(schema.clicks.phase);
+  type ClickPhase = { phase: number; averageTime: number };
+  const unsortedYourPhases = clicksPerSecondByPhase.reduce((acc, row) => {
+    return [
+      ...acc,
+      {
+        phase: row.phase,
+        averageTime: row.clicksPerSecond,
+      },
+    ];
+  }, [] as ClickPhase[]);
+  const yourPhases = [...unsortedYourPhases].sort((a, b) => a.phase - b.phase);
+
+  // average phases
+  // const clicksPerSecondBySession = await db
   //   .select({
+  //     sessionId: schema.clicks.sessionId,
   //     phase: schema.clicks.phase,
-  //     avgTime: sql<number>`avg(extract(epoch from lead(${schema.clicks.dateCreated}, 1) over (partition by ${schema.clicks.phase} order by ${schema.clicks.dateCreated}) - ${schema.clicks.dateCreated}))`,
+  //     clicksPerSecond: sql<number>`count(*) / (max(${schema.clicks.dateCreated}) - min(${schema.clicks.dateCreated}))`,
   //   })
   //   .from(schema.clicks)
-  //   .where(eq(schema.clicks.sessionId, sessionId))
-  //   .groupBy(schema.clicks.phase);
-  // const unsortedYourPhases = yourAverageTimeBetweenClicks.reduce((acc, row) => {
+  //   .groupBy(schema.clicks.sessionId, schema.clicks.phase);
+  // const unsortedAveragePhases = clicksPerSecondBySession.reduce((acc, row) => {
   //   return [
   //     ...acc,
   //     {
   //       phase: row.phase,
-  //       averageTime: row.avgTime,
+  //       averageTime: row.clicksPerSecond,
   //     },
   //   ];
   // }, [] as ClickPhase[]);
-  // const yourPhases = [...unsortedYourPhases].sort((a, b) => a.phase - b.phase);
 
   res.json({
     sessionId,
@@ -205,7 +205,7 @@ router.get('/analyse-session/:sessionId', async (req, res) => {
     sessionsWithMaxPhasesCount,
     totalSessions,
     percentageStoppedImmediately,
-    yourPhases: [],
+    yourPhases,
     averagePhases: [],
   });
 });
