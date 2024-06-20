@@ -12,7 +12,7 @@ const clicksPerPhase = [
   5, 20, 30, 10, 20, 30, 10, 10, 10, 10, 10, 10, 10, 10, 10, 30, 30, 30, 30, 30, 30, 30, 30,
 ];
 const timeoutTicksPerPhase = (phase: number) => {
-  if (phase < 10) {
+  if (phase < 14) {
     return 60;
   }
 
@@ -90,7 +90,7 @@ const App = () => {
     if (timeoutTicks === timeoutTicksForPhase) {
       if (phase === 0) {
         setTimeoutTicks(() => 0);
-      } else if (phase < 10) {
+      } else if (phase < 14) {
         if (sessionId) {
           updateSession({ sessionId, phase, clicks: clicksCache, mobile: isMobile });
         }
@@ -309,9 +309,9 @@ const App = () => {
           opacity: showStats ? 1 : 0,
           pointerEvents: showStats ? 'auto' : 'none',
           transition: 'opacity ease-in-out 0.3s',
-          justifyContent: 'center',
-          alignItems: 'center',
           backgroundColor: 'white',
+          padding: '10%',
+          boxSizing: 'border-box',
           overflowY: 'auto',
         }}
       >
@@ -336,7 +336,7 @@ const App = () => {
         top: 0,
         left: 0,
         height: '100vh',
-        width: '100vw',
+        width: '100%',
       }}
     >
       {loading}
