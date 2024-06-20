@@ -4,15 +4,24 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 
-import { useIsMobile } from './hooks';
+import { useTime, useIsMobile } from './hooks';
 import { createSession, updateSession } from './api';
 
 const clicksPerPhase = [
   5, 20, 30, 10, 20, 30, 10, 10, 10, 10, 10, 10, 10, 10, 10, 30, 30, 30, 30, 30, 30, 30, 30,
 ];
+const timeoutTicksPerPhase = (phase: number) => {
+  if (phase < 10) {
+    return 60;
+  }
+
+  return 10;
+};
 
 const App = () => {
-  const [hidden, setHidden] = useState(false);
+  const { t1 } = useTime();
+  const [timeoutTicks, setTimeoutTicks] = useState(0);
+  const [showStats, setShowStats] = useState(false);
   const { isMobile } = useIsMobile();
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [phase, setPhase] = useState(0);
@@ -30,6 +39,12 @@ const App = () => {
       return [...prev, newClick - prev[0]];
     });
     setClickCount((prev) => prev + 1);
+
+    if (phase < clicksPerPhase.length - 1) {
+      setTimeoutTicks(() => 0);
+    }
+
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setClicks, setClickCount]);
 
   useEffect(() => {
@@ -64,14 +79,26 @@ const App = () => {
       updateSession({ sessionId, phase, clicks: clicksCache, mobile: isMobile });
     }
 
-    if (phase === clicksPerPhase.length - 1) {
-      setTimeout(() => {
-        setHidden(() => true);
-      }, 1000);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase]);
+
+  useEffect(() => {
+    const timeoutTicksForPhase = timeoutTicksPerPhase(phase);
+
+    if (timeoutTicks === timeoutTicksForPhase) {
+      if (phase === 0) {
+        setTimeoutTicks(() => 0);
+      } else if (phase < 10) {
+        window.location.reload();
+      } else {
+        setShowStats(() => true);
+      }
+    } else {
+      setTimeoutTicks((prev) => prev + 1);
     }
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [phase]);
+  }, [t1]);
 
   const loading = useMemo(
     () => (
@@ -211,7 +238,7 @@ const App = () => {
           bottom: 0,
           height: '100%',
           width: '100%',
-          opacity: sessionId ? 1 : 0,
+          opacity: sessionId && !showStats ? 1 : 0,
           transition: 'opacity ease-in-out 0.3s',
           justifyContent: 'center',
           alignItems: 'center',
@@ -229,7 +256,37 @@ const App = () => {
         </Stack>
       </Stack>
     ),
-    [sessionId, messageContainer, button],
+    [sessionId, showStats, messageContainer, button],
+  );
+  const stats = useMemo(
+    () => (
+      <Stack
+        sx={{
+          position: 'absolute',
+          top: 0,
+          bottom: 0,
+          height: '100%',
+          width: '100%',
+          opacity: showStats ? 1 : 0,
+          transition: 'opacity ease-in-out 0.3s',
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: 'white',
+        }}
+      >
+        <Stack
+          sx={{
+            height: '100%',
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: 'white',
+          }}
+        >
+          <Typography sx={{ fontFamily: 'copperplate', fontSize: 20 }}>STATS</Typography>
+        </Stack>
+      </Stack>
+    ),
+    [showStats],
   );
 
   return (
@@ -240,11 +297,11 @@ const App = () => {
         left: 0,
         height: '100vh',
         width: '100vw',
-        display: hidden ? 'none' : 'block',
       }}
     >
       {loading}
       {ui}
+      {stats}
     </Box>
   );
 };
