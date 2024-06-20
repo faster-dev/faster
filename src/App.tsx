@@ -7,7 +7,9 @@ import Button from '@mui/material/Button';
 import { useIsMobile } from './hooks';
 import { createSession, updateSession } from './api';
 
-const clicksPerPhase = [5, 20, 30, 10, 20, 30, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10];
+const clicksPerPhase = [
+  5, 20, 30, 10, 20, 30, 10, 10, 10, 10, 10, 10, 10, 10, 10, 30, 30, 30, 30, 30, 30, 30, 30,
+];
 
 const App = () => {
   const [hidden, setHidden] = useState(false);
@@ -125,6 +127,20 @@ const App = () => {
       case 14:
         return 'Seriously, stop';
       case 15:
+        return <img src="/its-time-to-stop-stop.gif" />;
+      case 16:
+        return <img src="/stop-it-stop.gif" />;
+      case 17:
+        return <img src="/stop-office.webp" />;
+      case 18:
+        return <img src="/stop-it.webp" />;
+      case 19:
+        return <img src="/facepalm.webp" />;
+      case 20:
+        return <img src="/cut-it-out.webp" />;
+      case 21:
+        return <img src="/i-will-find-you.webp" />;
+      case 22:
         return 'Goodbye';
     }
   }, [phase]);
@@ -138,6 +154,11 @@ const App = () => {
           alignItems: 'center',
           backgroundColor: 'white',
           textAlign: 'center',
+          '& img': {
+            width: '100%',
+            position: 'relative',
+            top: '60px',
+          },
         }}
       >
         <Typography sx={{ fontSize: 20, pointerEvents: 'none', userSelect: 'none' }}>
