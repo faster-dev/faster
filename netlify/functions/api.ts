@@ -127,7 +127,7 @@ router.get('/analyse-session/:sessionId', async (req, res) => {
   const stoppedImmediately = (maxPhase || 0) <= 13;
 
   // get maximum phase value for each session
-  const sessionsWithMaxPhases = await db
+  const sessionsWithMaxPhases = db
     .select({
       sessionId: schema.sessions.id,
       maxPhase: sql<number>`max(${schema.clicks.phase})`,
@@ -135,8 +135,12 @@ router.get('/analyse-session/:sessionId', async (req, res) => {
     .from(schema.sessions)
     .leftJoin(schema.clicks, eq(schema.sessions.id, schema.clicks.sessionId))
     .groupBy(schema.sessions.id)
-    .having(({ maxPhase }) => lte(maxPhase, 13));
-  const sessionsWithMaxPhasesCount = sessionsWithMaxPhases.length;
+    .having(({ maxPhase }) => lte(maxPhase, 13))
+    .as('sessionsWithMaxPhases');
+  const sessionsWithMaxPhasesCountQuery = await db
+    .select({ count: sql<number>`count(*)` })
+    .from(sessionsWithMaxPhases);
+  const sessionsWithMaxPhasesCount = sessionsWithMaxPhasesCountQuery[0]?.count;
 
   // count all sessions
   const totalSessionsQuery = await db
