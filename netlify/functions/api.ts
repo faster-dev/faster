@@ -1,7 +1,7 @@
 import express, { Router } from 'express';
 import serverless from 'serverless-http';
 import { v4 as uuidv4, parse } from 'uuid';
-import { sql, countDistinct, eq, max, lte } from 'drizzle-orm';
+import { sql, countDistinct, eq, lte } from 'drizzle-orm';
 import isNumber from 'lodash/isNumber';
 import isBoolean from 'lodash/isBoolean';
 
@@ -119,11 +119,14 @@ router.get('/analyse-session/:sessionId', async (req, res) => {
   // get max phase value in session
   const maxPhaseQuery = await db
     .select({
-      value: max(schema.clicks.phase),
+      sessionId: schema.sessions.id,
+      maxPhase: sql<number>`max(${schema.clicks.phase})`,
     })
-    .from(schema.clicks)
-    .where(eq(schema.clicks.sessionId, sessionId));
-  const maxPhase = maxPhaseQuery[0]?.value;
+    .from(schema.sessions)
+    .leftJoin(schema.clicks, eq(schema.sessions.id, schema.clicks.sessionId))
+    .where(eq(schema.clicks.sessionId, sessionId))
+    .having(({ maxPhase }) => lte(maxPhase, 13));
+  const maxPhase = maxPhaseQuery[0]?.maxPhase;
   const stoppedImmediately = (maxPhase || 0) <= 13;
 
   // get maximum phase value for each session
