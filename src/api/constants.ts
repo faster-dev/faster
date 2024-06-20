@@ -5,6 +5,8 @@ export const apiEndpoint = '/api';
 export const fakeAnalyseSessionResponse = (sessionId: string): AnalyseSessionResponse => ({
   sessionId,
   clicksCount: 100,
+  stoppedImmediately: false,
+  percetageStoppedImmediately: 20,
   yourPhases: [
     {
       phase: 0,

@@ -11,6 +11,8 @@ export type PhaseDetails = {
 export type AnalyseSessionResponse = {
   sessionId: string;
   clicksCount: number;
+  stoppedImmediately: boolean;
+  percetageStoppedImmediately: number;
   yourPhases: PhaseDetails[];
   averagePhases: PhaseDetails[];
 };

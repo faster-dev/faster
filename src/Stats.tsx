@@ -5,10 +5,12 @@ import { AnalyseSessionResponse } from './api';
 import {
   getAverageFastestSpeed,
   getAverageSpeedIncrease,
+  getAverageStoppedImmediately,
   getFastestSpeed,
   getSpeedIncrease,
   getStartDifference,
   getStartRate,
+  getStoppedImmediately,
 } from './utilities';
 
 export type StatsProps = {
@@ -51,10 +53,10 @@ const Stats: React.FunctionComponent<StatsProps> = ({ statsData }) => {
   // When told to stop, you:
   // - Stopped immediately - only X% of people do this
   // - Did not stop - Y% of people do this
-  const stoppedImmediately = true;
-  const stoppedImmediatelyPercentage = 20;
+  const stoppedImmediately = getStoppedImmediately(statsData);
+  const stoppedImmediatelyPercentage = getAverageStoppedImmediately(statsData);
   const stoppedImmediatelySmall = stoppedImmediatelyPercentage < 50;
-  const didNotStopPercentage = 80;
+  const didNotStopPercentage = 100 - stoppedImmediatelyPercentage;
   const didNotStopSmall = didNotStopPercentage < 50;
 
   return (
@@ -183,7 +185,7 @@ const Stats: React.FunctionComponent<StatsProps> = ({ statsData }) => {
                 </Typography>
               ) : (
                 <Typography variant="h5" component="span" color="red">
-                  This is <u>normal</u>. You're not special.
+                  This is <u>normal</u>. You are not special.
                 </Typography>
               )}
             </>
@@ -198,8 +200,9 @@ const Stats: React.FunctionComponent<StatsProps> = ({ statsData }) => {
                   This is <u>unusual</u>. You're a rare breed.
                 </Typography>
               ) : (
-                <Typography variant="h5" component="span" color="red">
-                  This is <u>normal</u>. You're not special.
+                <Typography variant="h5" component="span">
+                  This is <u>normal</u>. You are not special. However, you have a{' '}
+                  <u>problem with authority</u>.
                 </Typography>
               )}
             </>
