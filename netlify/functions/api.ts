@@ -154,6 +154,9 @@ router.get('/analyse-session/:sessionId', async (req, res) => {
     sessionId,
     clicksCount,
     stoppedImmediately,
+    maxPhase,
+    sessionsWithMaxPhasesCount,
+    totalSessions,
     percetageStoppedImmediately,
     yourPhases: [
       {
