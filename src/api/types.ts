@@ -12,7 +12,7 @@ export type AnalyseSessionResponse = {
   sessionId: string;
   clicksCount: number;
   stoppedImmediately: boolean;
-  percetageStoppedImmediately: number;
+  percentageStoppedImmediately: number;
   yourPhases: PhaseDetails[];
   averagePhases: PhaseDetails[];
 };
