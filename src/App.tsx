@@ -89,7 +89,13 @@ const App = () => {
       if (phase === 0) {
         setTimeoutTicks(() => 0);
       } else if (phase < 10) {
-        window.location.reload();
+        if (sessionId) {
+          updateSession({ sessionId, phase, clicks: clicksCache, mobile: isMobile });
+        }
+
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
       } else {
         setShowStats(() => true);
       }
@@ -268,6 +274,7 @@ const App = () => {
           height: '100%',
           width: '100%',
           opacity: showStats ? 1 : 0,
+          pointerEvents: showStats ? 'auto' : 'none',
           transition: 'opacity ease-in-out 0.3s',
           justifyContent: 'center',
           alignItems: 'center',
