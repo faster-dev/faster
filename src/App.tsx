@@ -93,6 +93,8 @@ const App = () => {
           updateSession({ sessionId, phase, clicks: clicksCache, mobile: isMobile });
         }
 
+        setTimeoutTicks((prev) => prev + 1);
+
         setTimeout(() => {
           window.location.reload();
         }, 2000);
