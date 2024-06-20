@@ -2,6 +2,14 @@ import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
 import { AnalyseSessionResponse } from './api';
+import {
+  getAverageFastestSpeed,
+  getAverageSpeedIncrease,
+  getFastestSpeed,
+  getSpeedIncrease,
+  getStartDifference,
+  getStartRate,
+} from './utilities';
 
 export type StatsProps = {
   statsData: AnalyseSessionResponse;
@@ -12,29 +20,32 @@ const Stats: React.FunctionComponent<StatsProps> = ({ statsData }) => {
   const totalClicks = statsData.clicksCount;
 
   // You started pressing the button X times per second
-  const startRate = 2.3;
+  const startRate = getStartRate(statsData);
 
   // This is Y% faster than average
-  const startDifference = 20;
+  const startDifference = getStartDifference(statsData);
   const startDifferencePositive = startDifference > 0;
+  const startDifferenceZero = Math.abs(startDifference) < 5;
   const startDifferenceLabel = startDifferencePositive ? 'faster' : 'slower';
 
   // When told to go faster, you went X% faster
-  const speedIncrease = 10;
+  const speedIncrease = getSpeedIncrease(statsData);
   const speedIncreasePositive = speedIncrease > 0;
   const speedIncreaseLabel = speedIncreasePositive ? 'faster' : 'slower';
 
   // Most people go Y% faster
-  const averageSpeedIncrease = 5;
+  const averageSpeedIncrease = getAverageSpeedIncrease(statsData);
   const averageSpeedIncreasePositive = averageSpeedIncrease > 0;
+  const averageSpeedIncreaseZero = Math.abs(averageSpeedIncrease - speedIncrease) < 5;
   const averageSpeedIncreaseLabel = averageSpeedIncreasePositive ? 'faster' : 'slower';
 
   // Your fastest speed was X times per second
-  const fastestSpeed = 3.5;
+  const fastestSpeed = getFastestSpeed(statsData);
 
   // This is Y% faster than average
-  const fastestDifference = 10;
+  const fastestDifference = getAverageFastestSpeed(statsData);
   const fastestDifferencePositive = fastestDifference > 0;
+  const fastestDifferenceZero = Math.abs(fastestDifference) < 5;
   const fastestDifferenceLabel = fastestDifferencePositive ? 'faster' : 'slower';
 
   // When told to stop, you:
@@ -42,7 +53,9 @@ const Stats: React.FunctionComponent<StatsProps> = ({ statsData }) => {
   // - Did not stop - Y% of people do this
   const stoppedImmediately = true;
   const stoppedImmediatelyPercentage = 20;
+  const stoppedImmediatelySmall = stoppedImmediatelyPercentage < 50;
   const didNotStopPercentage = 80;
+  const didNotStopSmall = didNotStopPercentage < 50;
 
   return (
     <Stack spacing={2} sx={{ alignItems: 'flex-start', width: '100%' }}>
@@ -66,17 +79,21 @@ const Stats: React.FunctionComponent<StatsProps> = ({ statsData }) => {
           </Typography>{' '}
           times per second.
         </Typography>
-        <Typography variant="h5">
-          This is{' '}
-          <Typography
-            variant="h5"
-            component="span"
-            color={startDifferencePositive ? 'green' : 'red'}
-          >
-            {Math.abs(startDifference)}% {startDifferenceLabel}
-          </Typography>{' '}
-          than average.
-        </Typography>
+        {startDifferenceZero ? (
+          <Typography variant="h5">This is average, you average, average person.</Typography>
+        ) : (
+          <Typography variant="h5">
+            This is{' '}
+            <Typography
+              variant="h5"
+              component="span"
+              color={startDifferencePositive ? 'green' : 'red'}
+            >
+              {Math.abs(startDifference)}% {startDifferenceLabel}
+            </Typography>{' '}
+            than average.
+          </Typography>
+        )}
       </Stack>
       <Stack
         spacing={1}
@@ -89,17 +106,23 @@ const Stats: React.FunctionComponent<StatsProps> = ({ statsData }) => {
           </Typography>{' '}
           .
         </Typography>
-        <Typography variant="h5">
-          Most people go{' '}
-          <Typography
-            variant="h5"
-            component="span"
-            color={averageSpeedIncreasePositive ? 'green' : 'red'}
-          >
-            {Math.abs(averageSpeedIncrease)}% {averageSpeedIncreaseLabel}
-          </Typography>{' '}
-          .
-        </Typography>
+        {averageSpeedIncreaseZero ? (
+          <Typography variant="h5">
+            This is what most people do. You're just like everyone else.
+          </Typography>
+        ) : (
+          <Typography variant="h5">
+            Most people go{' '}
+            <Typography
+              variant="h5"
+              component="span"
+              color={averageSpeedIncreasePositive ? 'green' : 'red'}
+            >
+              {Math.abs(averageSpeedIncrease)}% {averageSpeedIncreaseLabel}
+            </Typography>{' '}
+            .
+          </Typography>
+        )}
       </Stack>
       <Stack
         spacing={1}
@@ -112,17 +135,23 @@ const Stats: React.FunctionComponent<StatsProps> = ({ statsData }) => {
           </Typography>{' '}
           times per second.
         </Typography>
-        <Typography variant="h5">
-          This is{' '}
-          <Typography
-            variant="h5"
-            component="span"
-            color={fastestDifferencePositive ? 'green' : 'red'}
-          >
-            {Math.abs(fastestDifference)}% {fastestDifferenceLabel}
-          </Typography>{' '}
-          than average.
-        </Typography>
+        {fastestDifferenceZero ? (
+          <Typography variant="h5">
+            This is <u>average</u>. You've done it again.
+          </Typography>
+        ) : (
+          <Typography variant="h5">
+            This is{' '}
+            <Typography
+              variant="h5"
+              component="span"
+              color={fastestDifferencePositive ? 'green' : 'red'}
+            >
+              {Math.abs(fastestDifference)}% {fastestDifferenceLabel}
+            </Typography>{' '}
+            than average.
+          </Typography>
+        )}
       </Stack>
       <Stack
         spacing={1}
@@ -144,18 +173,35 @@ const Stats: React.FunctionComponent<StatsProps> = ({ statsData }) => {
         <Typography variant="h5">
           {stoppedImmediately ? (
             <>
-              Only{' '}
               <Typography variant="h5" component="span" color="green">
                 {stoppedImmediatelyPercentage}%
               </Typography>{' '}
               of people do this.
+              {stoppedImmediatelySmall ? (
+                <Typography variant="h5" component="span">
+                  This is <u>unusual</u>. You're a rare breed.
+                </Typography>
+              ) : (
+                <Typography variant="h5" component="span" color="red">
+                  This is <u>normal</u>. You're not special.
+                </Typography>
+              )}
             </>
           ) : (
             <>
-              <Typography variant="h5" component="span" color="red">
+              <Typography variant="h5" component="span" color="green">
                 {didNotStopPercentage}%
               </Typography>{' '}
               of people do this.
+              {didNotStopSmall ? (
+                <Typography variant="h5" component="span">
+                  This is <u>unusual</u>. You're a rare breed.
+                </Typography>
+              ) : (
+                <Typography variant="h5" component="span" color="red">
+                  This is <u>normal</u>. You're not special.
+                </Typography>
+              )}
             </>
           )}
         </Typography>

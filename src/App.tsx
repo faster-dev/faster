@@ -16,7 +16,7 @@ const timeoutTicksPerPhase = (phase: number) => {
     return 60;
   }
 
-  return 10;
+  return 5;
 };
 
 const App = () => {
@@ -306,8 +306,8 @@ const App = () => {
           bottom: 0,
           height: '100%',
           width: '100%',
-          opacity: showStats ? 1 : 0,
-          pointerEvents: showStats ? 'auto' : 'none',
+          opacity: showStats && statsData ? 1 : 0,
+          pointerEvents: showStats && statsData ? 'auto' : 'none',
           transition: 'opacity ease-in-out 0.3s',
           backgroundColor: 'white',
           padding: '10%',
