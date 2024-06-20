@@ -157,6 +157,46 @@ router.get('/analyse-session/:sessionId', async (req, res) => {
     (sessionsWithMaxPhasesCount / totalSessions) * 100,
   );
 
+  // get time between clicks
+  const averageTimeBetweenClicks = await db
+    .select({
+      phase: schema.clicks.phase,
+      avgTime: sql<number>`avg(extract(epoch from lead(${schema.clicks.dateCreated}, 1) over (partition by ${schema.clicks.phase} order by ${schema.clicks.dateCreated}) - ${schema.clicks.dateCreated}))`,
+    })
+    .from(schema.clicks)
+    .groupBy(schema.clicks.phase);
+  type ClickPhase = { phase: number; averageTime: number };
+  const unsortedAveragePhases = averageTimeBetweenClicks.reduce((acc, row) => {
+    return [
+      ...acc,
+      {
+        phase: row.phase,
+        averageTime: row.avgTime,
+      },
+    ];
+  }, [] as ClickPhase[]);
+  const averagePhases = [...unsortedAveragePhases].sort((a, b) => a.phase - b.phase);
+
+  // your phases
+  const yourAverageTimeBetweenClicks = await db
+    .select({
+      phase: schema.clicks.phase,
+      avgTime: sql<number>`avg(extract(epoch from lead(${schema.clicks.dateCreated}, 1) over (partition by ${schema.clicks.phase} order by ${schema.clicks.dateCreated}) - ${schema.clicks.dateCreated}))`,
+    })
+    .from(schema.clicks)
+    .where(eq(schema.clicks.sessionId, sessionId))
+    .groupBy(schema.clicks.phase);
+  const unsortedYourPhases = yourAverageTimeBetweenClicks.reduce((acc, row) => {
+    return [
+      ...acc,
+      {
+        phase: row.phase,
+        averageTime: row.avgTime,
+      },
+    ];
+  }, [] as ClickPhase[]);
+  const yourPhases = [...unsortedYourPhases].sort((a, b) => a.phase - b.phase);
+
   res.json({
     sessionId,
     clicksCount,
@@ -165,240 +205,8 @@ router.get('/analyse-session/:sessionId', async (req, res) => {
     sessionsWithMaxPhasesCount,
     totalSessions,
     percentageStoppedImmediately,
-    yourPhases: [
-      {
-        phase: 0,
-        averageTime: 1,
-        standardDeviation: 0.1,
-      },
-      {
-        phase: 1,
-        averageTime: 1.1,
-        standardDeviation: 0.2,
-      },
-      {
-        phase: 2,
-        averageTime: 1.2,
-        standardDeviation: 0.3,
-      },
-      {
-        phase: 3,
-        averageTime: 1.3,
-        standardDeviation: 0.4,
-      },
-      {
-        phase: 4,
-        averageTime: 1.4,
-        standardDeviation: 0.5,
-      },
-      {
-        phase: 5,
-        averageTime: 1.5,
-        standardDeviation: 0.6,
-      },
-      {
-        phase: 6,
-        averageTime: 1.6,
-        standardDeviation: 0.7,
-      },
-      {
-        phase: 7,
-        averageTime: 1.7,
-        standardDeviation: 0.8,
-      },
-      {
-        phase: 8,
-        averageTime: 1.8,
-        standardDeviation: 0.9,
-      },
-      {
-        phase: 9,
-        averageTime: 1.9,
-        standardDeviation: 1,
-      },
-      {
-        phase: 10,
-        averageTime: 2,
-        standardDeviation: 1.1,
-      },
-      {
-        phase: 11,
-        averageTime: 2.1,
-        standardDeviation: 1.2,
-      },
-      {
-        phase: 12,
-        averageTime: 2.2,
-        standardDeviation: 1.3,
-      },
-      {
-        phase: 13,
-        averageTime: 2.3,
-        standardDeviation: 1.4,
-      },
-      {
-        phase: 14,
-        averageTime: 2.4,
-        standardDeviation: 1.5,
-      },
-      {
-        phase: 15,
-        averageTime: 2.5,
-        standardDeviation: 1.6,
-      },
-      {
-        phase: 16,
-        averageTime: 2.6,
-        standardDeviation: 1.7,
-      },
-      {
-        phase: 17,
-        averageTime: 2.7,
-        standardDeviation: 1.8,
-      },
-      {
-        phase: 18,
-        averageTime: 2.8,
-        standardDeviation: 1.9,
-      },
-      {
-        phase: 19,
-        averageTime: 2.9,
-        standardDeviation: 2,
-      },
-      {
-        phase: 20,
-        averageTime: 3,
-        standardDeviation: 2.1,
-      },
-      {
-        phase: 21,
-        averageTime: 3.1,
-        standardDeviation: 2.2,
-      },
-      {
-        phase: 22,
-        averageTime: 3.2,
-        standardDeviation: 2.3,
-      },
-    ],
-    averagePhases: [
-      {
-        phase: 0,
-        averageTime: 1,
-        standardDeviation: 0.1,
-      },
-      {
-        phase: 1,
-        averageTime: 1.1,
-        standardDeviation: 0.2,
-      },
-      {
-        phase: 2,
-        averageTime: 1.2,
-        standardDeviation: 0.3,
-      },
-      {
-        phase: 3,
-        averageTime: 1.3,
-        standardDeviation: 0.4,
-      },
-      {
-        phase: 4,
-        averageTime: 1.4,
-        standardDeviation: 0.5,
-      },
-      {
-        phase: 5,
-        averageTime: 1.5,
-        standardDeviation: 0.6,
-      },
-      {
-        phase: 6,
-        averageTime: 1.6,
-        standardDeviation: 0.7,
-      },
-      {
-        phase: 7,
-        averageTime: 1.7,
-        standardDeviation: 0.8,
-      },
-      {
-        phase: 8,
-        averageTime: 1.8,
-        standardDeviation: 0.9,
-      },
-      {
-        phase: 9,
-        averageTime: 1.9,
-        standardDeviation: 1,
-      },
-      {
-        phase: 10,
-        averageTime: 2,
-        standardDeviation: 1.1,
-      },
-      {
-        phase: 11,
-        averageTime: 2.1,
-        standardDeviation: 1.2,
-      },
-      {
-        phase: 12,
-        averageTime: 2.2,
-        standardDeviation: 1.3,
-      },
-      {
-        phase: 13,
-        averageTime: 2.3,
-        standardDeviation: 1.4,
-      },
-      {
-        phase: 14,
-        averageTime: 2.4,
-        standardDeviation: 1.5,
-      },
-      {
-        phase: 15,
-        averageTime: 2.5,
-        standardDeviation: 1.6,
-      },
-      {
-        phase: 16,
-        averageTime: 2.6,
-        standardDeviation: 1.7,
-      },
-      {
-        phase: 17,
-        averageTime: 2.7,
-        standardDeviation: 1.8,
-      },
-      {
-        phase: 18,
-        averageTime: 2.8,
-        standardDeviation: 1.9,
-      },
-      {
-        phase: 19,
-        averageTime: 2.9,
-        standardDeviation: 2,
-      },
-      {
-        phase: 20,
-        averageTime: 3,
-        standardDeviation: 2.1,
-      },
-      {
-        phase: 21,
-        averageTime: 3.1,
-        standardDeviation: 2.2,
-      },
-      {
-        phase: 22,
-        averageTime: 3.2,
-        standardDeviation: 2.3,
-      },
-    ],
+    yourPhases,
+    averagePhases,
   });
 });
 
