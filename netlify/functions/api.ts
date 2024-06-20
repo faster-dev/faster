@@ -161,7 +161,7 @@ router.get('/analyse-session/:sessionId', async (req, res) => {
   const clicksPerSecondByPhase = await db
     .select({
       phase: schema.clicks.phase,
-      clicksPerSecond: sql<number>`count(*) / (max(${schema.clicks.dateCreated}) - min(${schema.clicks.dateCreated}))`,
+      clicksPerSecond: sql<number>`count(*) / EXTRACT(EPOCH FROM (max(${schema.clicks.dateCreated}) - min(${schema.clicks.dateCreated})))`,
     })
     .from(schema.clicks)
     .where(eq(schema.clicks.sessionId, sessionId))
