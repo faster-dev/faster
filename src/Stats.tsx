@@ -61,7 +61,7 @@ const Stats: React.FunctionComponent<StatsProps> = ({ statsData }) => {
 
   return (
     <Stack spacing={2} sx={{ alignItems: 'flex-start', width: '100%' }}>
-      <Stack sx={{ border: '1px solid', borderRadius: 1, borderColor: 'lightgrey', padding: 2 }}>
+      <Stack sx={{ border: '1px solid', borderRadius: 1, borderColor: 'lightgrey', padding: 3 }}>
         <Typography variant="h5">
           You pressed the button a total of{' '}
           <Typography variant="h5" component="span" color="green">
@@ -72,7 +72,7 @@ const Stats: React.FunctionComponent<StatsProps> = ({ statsData }) => {
       </Stack>
       <Stack
         spacing={1}
-        sx={{ border: '1px solid', borderRadius: 1, borderColor: 'lightgrey', padding: 2 }}
+        sx={{ border: '1px solid', borderRadius: 1, borderColor: 'lightgrey', padding: 3 }}
       >
         <Typography variant="h5">
           You started pressing the button{' '}
@@ -99,7 +99,7 @@ const Stats: React.FunctionComponent<StatsProps> = ({ statsData }) => {
       </Stack>
       <Stack
         spacing={1}
-        sx={{ border: '1px solid', borderRadius: 1, borderColor: 'lightgrey', padding: 2 }}
+        sx={{ border: '1px solid', borderRadius: 1, borderColor: 'lightgrey', padding: 3 }}
       >
         <Typography variant="h5">
           When told to go faster, you went{' '}
@@ -128,7 +128,7 @@ const Stats: React.FunctionComponent<StatsProps> = ({ statsData }) => {
       </Stack>
       <Stack
         spacing={1}
-        sx={{ border: '1px solid', borderRadius: 1, borderColor: 'lightgrey', padding: 2 }}
+        sx={{ border: '1px solid', borderRadius: 1, borderColor: 'lightgrey', padding: 3 }}
       >
         <Typography variant="h5">
           Your fastest speed was{' '}
@@ -157,7 +157,7 @@ const Stats: React.FunctionComponent<StatsProps> = ({ statsData }) => {
       </Stack>
       <Stack
         spacing={1}
-        sx={{ border: '1px solid', borderRadius: 1, borderColor: 'lightgrey', padding: 2 }}
+        sx={{ border: '1px solid', borderRadius: 1, borderColor: 'lightgrey', padding: 3 }}
       >
         <Typography variant="h5">
           When told to stop, you{' '}
