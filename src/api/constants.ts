@@ -6,7 +6,7 @@ export const fakeAnalyseSessionResponse = (sessionId: string): AnalyseSessionRes
   sessionId,
   clicksCount: 100,
   stoppedImmediately: false,
-  percetageStoppedImmediately: 20,
+  percentageStoppedImmediately: 20,
   yourPhases: [
     {
       phase: 0,
