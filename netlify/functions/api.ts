@@ -124,6 +124,7 @@ router.get('/analyse-session/:sessionId', async (req, res) => {
     })
     .from(schema.sessions)
     .leftJoin(schema.clicks, eq(schema.sessions.id, schema.clicks.sessionId))
+    .groupBy(schema.sessions.id)
     .where(eq(schema.clicks.sessionId, sessionId))
     .having(({ maxPhase }) => lte(maxPhase, 13));
   const maxPhase = maxPhaseQuery[0]?.maxPhase;
