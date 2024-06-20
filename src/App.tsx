@@ -22,7 +22,7 @@ const timeoutTicksPerPhase = (phase: number) => {
 const App = () => {
   const { t1 } = useTime();
   const [timeoutTicks, setTimeoutTicks] = useState(0);
-  const [showStats, setShowStats] = useState(true);
+  const [showStats, setShowStats] = useState(false);
   const [statsData, setStatsData] = useState<AnalyseSessionResponse | undefined>();
   const { isMobile } = useIsMobile();
   const [sessionId, setSessionId] = useState<string | null>(null);
