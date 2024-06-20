@@ -131,13 +131,12 @@ router.get('/analyse-session/:sessionId', async (req, res) => {
     .select({
       sessionId: schema.sessions.id,
       maxPhase: sql<number>`max(${schema.clicks.phase})`,
-      count: countDistinct(schema.sessions.id),
     })
     .from(schema.sessions)
     .leftJoin(schema.clicks, eq(schema.sessions.id, schema.clicks.sessionId))
     .groupBy(schema.sessions.id)
     .having(({ maxPhase }) => lte(maxPhase, 13));
-  const sessionsWithMaxPhasesCount = sessionsWithMaxPhases[0]?.count;
+  const sessionsWithMaxPhasesCount = sessionsWithMaxPhases.length;
 
   // count all sessions
   const totalSessionsQuery = await db
