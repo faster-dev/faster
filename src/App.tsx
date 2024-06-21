@@ -107,6 +107,13 @@ const App = () => {
       setTimeoutTicks((prev) => prev + 1);
     }
 
+    // last phase
+    if (phase === clicksPerPhase.length - 1) {
+      setTimeout(() => {
+        setShowStats(() => true);
+      }, 1000);
+    }
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [t1]);
 
