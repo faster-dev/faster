@@ -80,7 +80,7 @@ const analyseSession = async ({ db, schema, sessionId }: AnalyseSessionArgs) => 
       ...acc,
       {
         phase: row.phase,
-        averageTime: row.clicksPerSecond,
+        averageTime: parseFloat(row.clicksPerSecond),
       },
     ];
   }, [] as ClickPhase[]);
