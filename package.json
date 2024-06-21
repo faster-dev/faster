@@ -9,7 +9,8 @@
     "lint": "eslint . --ext ts,tsx --report-unused-disable-directives --max-warnings 0",
     "preview": "vite preview",
     "makemigrations": "npx drizzle-kit generate:pg",
-    "migrate": "npx tsx netlify/functions/db/migrate.ts"
+    "migrate": "npx tsx netlify/functions/db/migrate.ts",
+    "test:session": "npx tsx test/session.ts"
   },
   "dependencies": {
     "@mui/icons-material": "^5.10.9",
