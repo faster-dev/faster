@@ -2,7 +2,7 @@ import { AnalyseSessionResponse } from '../api';
 import getFastestSpeed from './getFastestSpeed';
 
 const getAverageFastestSpeed = (statsData: AnalyseSessionResponse) => {
-  const fastestSpeed = getFastestSpeed(statsData);
+  const fastestSpeed = parseFloat(getFastestSpeed(statsData));
 
   let averageFastestSpeed = 0;
 
