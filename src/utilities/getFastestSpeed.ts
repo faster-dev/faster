@@ -9,7 +9,7 @@ const getFastestSpeed = (statsData: AnalyseSessionResponse) => {
     }
   }
 
-  return fastestSpeed;
+  return fastestSpeed.toFixed(3);
 };
 
 export default getFastestSpeed;

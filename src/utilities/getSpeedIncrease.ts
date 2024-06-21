@@ -15,7 +15,8 @@ const getSpeedIncrease = (statsData: AnalyseSessionResponse) => {
     return Math.round(((currentAverage - previousAverage) / previousAverage) * 100);
   });
   const averageIncrease =
-    increasePercentages.reduce((sum, increase) => sum + increase, 0) / increasePercentages.length;
+    (increasePercentages.reduce((sum, increase) => sum + increase, 0) * 100) /
+    increasePercentages.length;
 
   return Math.round(averageIncrease);
 };

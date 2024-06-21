@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "makemigrations": "npx drizzle-kit generate:pg",
     "migrate": "npx tsx netlify/functions/db/migrate.ts",
-    "test:session": "npx tsx test/session.ts"
+    "test:session": "npx tsx test/session.ts",
+    "test:purge": "npx tsx test/purge.ts"
   },
   "dependencies": {
     "@mui/icons-material": "^5.10.9",
